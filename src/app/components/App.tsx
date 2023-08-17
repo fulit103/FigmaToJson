@@ -1,23 +1,18 @@
 import React, { useState } from 'react';
 import logo from '../assets/logo.svg';
 import '../styles/ui.css';
+import ReactJson from 'react-json-view';
 
 function App() {
-  const textbox = React.useRef<HTMLInputElement>(undefined);
-  const [selected, setSelected] = useState(false);
+  const [selectedElements, setSelectedElements] = useState< string []>([]);
+  const [nodeJson, setNodeJson] = useState<Object>(null);
 
-  const countRef = React.useCallback((element: HTMLInputElement) => {
-    if (element) element.value = '5';
-    textbox.current = element;
-  }, []);
-
-  const onCreate = () => {
-    const count = parseInt(textbox.current.value, 10);
-    parent.postMessage({ pluginMessage: { type: 'create-rectangles', count } }, '*');
+  const onCreateJson = () => {    
+    parent.postMessage({ pluginMessage: { type: 'create-json' } }, '*');
   };
 
   const onCancel = () => {
-    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
+    setNodeJson(null);
   };
 
   React.useEffect(() => {
@@ -30,12 +25,16 @@ function App() {
 
       if (type === 'code') {
         console.log('code', event.data.pluginMessage);
-        setSelected(true);
+        setSelectedElements(event.data.pluginMessage.selection);
       }
 
       if (type == 'empty') {
         console.log('empty');
-        setSelected(false);
+        setSelectedElements([]);
+      }
+
+      if (type == 'node-json'){
+        setNodeJson(message);
       }
     };
 
@@ -47,15 +46,25 @@ function App() {
   return (
     <div>
       <img src={logo} />
-      <h2>Rectangle Creator Jebbit</h2>
-      <p>
+      <h2>Jebbit Screen Creator</h2>
+      <ul>
+        {selectedElements.map((element, index) => <li key={index} style={{textAlign: 'left'}}>{element}</li>)}
+      </ul>
+
+      {/*<p>
         Count: <input ref={countRef} />
         Selected: {selected ? 'true' : 'false'}
-      </p>
-      <button id="create" onClick={onCreate}>
-        Create
+      </p>*/}
+
+
+      {nodeJson && <p>
+        <ReactJson src={nodeJson} style={{textAlign: 'left'}}/>
+      </p>}
+
+      <button id="create" onClick={onCreateJson}>
+        Create Json
       </button>
-      <button onClick={onCancel}>Cancel</button>
+      <button onClick={onCancel}>Clear</button>
     </div>
   );
 }

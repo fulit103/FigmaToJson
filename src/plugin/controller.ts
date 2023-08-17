@@ -1,4 +1,27 @@
-figma.showUI(__html__);
+import { buildOriginalLayerTree } from "./figmaNode/buildOriginalLayerTree";
+import { buildTagTree } from "./figmaNode/buildTagTree";
+import { removeUnnecessaryPropsFromTagTree } from "./figmaNode/removeUnnecessaryPropsFromTagTree";
+
+figma.showUI(__html__, {
+  height: 1000,  // Height of the UI in pixels
+  width: 500,
+});
+
+function sendSelection() {
+  console.log('selectionchange', figma.currentPage.selection);
+
+  if (figma.currentPage.selection.length === 0) {
+    figma.ui.postMessage({
+      type: "empty",
+    });
+    return;
+  }
+
+  figma.ui.postMessage({
+    type: 'code',
+    selection: figma.currentPage.selection.map(element => element.name)
+  })
+}
 
 figma.ui.onmessage = (msg) => {
   if (msg.type === 'create-rectangles') {
@@ -22,23 +45,38 @@ figma.ui.onmessage = (msg) => {
     });
   }
 
-  console.log('message', msg);
+  if(msg.type == 'create-json') {
+    const selectedNode = figma.currentPage.selection[0]
+    const usedComponentNodes: ComponentNode[] = [];
 
-  figma.closePlugin();
+    const thisTagTree = buildTagTree(selectedNode, usedComponentNodes);
+
+    const originalNodeTree = buildOriginalLayerTree(selectedNode);    
+
+    if (!thisTagTree) {
+      figma.notify('No visible nodes found');
+      figma.closePlugin();
+      return;
+    }
+
+    const nodeJSON = removeUnnecessaryPropsFromTagTree(thisTagTree);
+
+    console.log(nodeJSON);
+
+    figma.ui.postMessage({
+      type: 'node-json',
+      message: nodeJSON,
+    });
+  }
+
+  //console.log('message', msg);
+
+  //figma.closePlugin();
 };
 
 figma.on("selectionchange", () => {
-  console.log('selectionchange');
-
-  if (figma.currentPage.selection.length === 0) {
-    figma.ui.postMessage({
-      type: "empty",
-    });
-    return;
-  }
-
-  figma.ui.postMessage({
-    type: 'code',
-    selection: figma.currentPage.selection
-  })
+  sendSelection();
 });
+
+sendSelection();
+
