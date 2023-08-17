@@ -22,5 +22,23 @@ figma.ui.onmessage = (msg) => {
     });
   }
 
+  console.log('message', msg);
+
   figma.closePlugin();
 };
+
+figma.on("selectionchange", () => {
+  console.log('selectionchange');
+
+  if (figma.currentPage.selection.length === 0) {
+    figma.ui.postMessage({
+      type: "empty",
+    });
+    return;
+  }
+
+  figma.ui.postMessage({
+    type: 'code',
+    selection: figma.currentPage.selection
+  })
+});

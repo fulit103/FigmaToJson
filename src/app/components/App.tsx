@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import logo from '../assets/logo.svg';
 import '../styles/ui.css';
 
 function App() {
   const textbox = React.useRef<HTMLInputElement>(undefined);
+  const [selected, setSelected] = useState(false);
 
   const countRef = React.useCallback((element: HTMLInputElement) => {
     if (element) element.value = '5';
@@ -21,20 +22,35 @@ function App() {
 
   React.useEffect(() => {
     // This is how we read messages sent from the plugin controller
-    window.onmessage = (event) => {
+    window.onmessage = (event: MessageEvent) => {
       const { type, message } = event.data.pluginMessage;
       if (type === 'create-rectangles') {
         console.log(`Figma Says: ${message}`);
       }
+
+      if (type === 'code') {
+        console.log('code', event.data.pluginMessage);
+        setSelected(true);
+      }
+
+      if (type == 'empty') {
+        console.log('empty');
+        setSelected(false);
+      }
+    };
+
+    return () => {
+      window.onmessage = null;
     };
   }, []);
 
   return (
     <div>
       <img src={logo} />
-      <h2>Rectangle Creator</h2>
+      <h2>Rectangle Creator Jebbit</h2>
       <p>
         Count: <input ref={countRef} />
+        Selected: {selected ? 'true' : 'false'}
       </p>
       <button id="create" onClick={onCreate}>
         Create
