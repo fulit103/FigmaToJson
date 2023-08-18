@@ -57,14 +57,19 @@ function App() {
       </p>*/}
 
 
+      
+
+      <button id="create" onClick={onCreateJson}>
+        Get Json
+      </button>
+      <button onClick={onCancel}>Clear</button>
+      <button id="create" >
+        Create Experience
+      </button>
+
       {nodeJson && <p>
         <ReactJson src={nodeJson} style={{textAlign: 'left'}}/>
       </p>}
-
-      <button id="create" onClick={onCreateJson}>
-        Create Json
-      </button>
-      <button onClick={onCancel}>Clear</button>
     </div>
   );
 }
