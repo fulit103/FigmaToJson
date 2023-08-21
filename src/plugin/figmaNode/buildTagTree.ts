@@ -40,11 +40,10 @@ export function buildTagTree(
   }
 
   const isImg = isImageNode(node);
-
   const childTags: Tag[] = [];
   if ('children' in node && !isImg) {
     node.children.forEach((child) => {
-      if (child.type === 'INSTANCE') {
+      /*if (child.type === 'INSTANCE') {
         const props = Object.keys(child.componentProperties).reduce(
           (_props, key) => {
             const value = child.componentProperties[
@@ -60,24 +59,29 @@ export function buildTagTree(
         );
 
         if ('Instance' in props) {
+          console.log('Prop Instance', props)
           delete props['Instance'];
         }
-
-        childTags.push({
-          name: child.name.replace(' ', ''),
+        console.log("IS_COMPONENT:  ", child)
+        console.log("IS_COMPONENT TYPE:  ", child.type)                
+        childTags.unshift({
+          name: child.name.replace(' ', ''),          
           props,
+          css: getCssDataForTag(child),
           isComponent: true,
-          children: [],
+          children: child.children,
         });
+        console.log("IS_COMPONENT children", child.children)
         if (child.mainComponent) {
-          componentNodes.push(child.mainComponent);
+          console.log("IS_COMPONENT mainComponent:  ", child.mainComponent)
+          componentNodes.unshift(child.mainComponent);
         }
-      } else {
+      } else {*/
         const childTag = buildTagTree(child, componentNodes);
         if (childTag) {
-          childTags.push(childTag);
+          childTags.unshift(childTag);
         }
-      }
+      //}
     });
   }
 

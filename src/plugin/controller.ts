@@ -46,27 +46,32 @@ figma.ui.onmessage = (msg) => {
   }
 
   if(msg.type == 'create-json') {
-    const selectedNode = figma.currentPage.selection[0]
-    const usedComponentNodes: ComponentNode[] = [];
+    try {
+      const selectedNode = figma.currentPage.selection[0]
+      const usedComponentNodes: ComponentNode[] = [];
 
-    const thisTagTree = buildTagTree(selectedNode, usedComponentNodes);
+      const thisTagTree = buildTagTree(selectedNode, usedComponentNodes);
 
-    const originalNodeTree = buildOriginalLayerTree(selectedNode);    
+      const originalNodeTree = buildOriginalLayerTree(selectedNode);    
 
-    if (!thisTagTree) {
-      figma.notify('No visible nodes found');
-      figma.closePlugin();
-      return;
+      if (!thisTagTree) {
+        figma.notify('No visible nodes found');
+        figma.closePlugin();
+        return;
+      }
+
+      const nodeJSON = removeUnnecessaryPropsFromTagTree(thisTagTree);
+
+      console.log(nodeJSON);
+
+      figma.ui.postMessage({
+        type: 'node-json',
+        message: nodeJSON,
+      });
+    } catch (e) {
+      console.log("Error", e )
     }
 
-    const nodeJSON = removeUnnecessaryPropsFromTagTree(thisTagTree);
-
-    console.log(nodeJSON);
-
-    figma.ui.postMessage({
-      type: 'node-json',
-      message: nodeJSON,
-    });
   }
 
   //console.log('message', msg);
